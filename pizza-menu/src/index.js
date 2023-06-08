@@ -71,33 +71,78 @@ const Menu = () => {
   return (
     <main className='menu'>
       <h2>Today's menu</h2>
-      <Pizza pizzaName='Focaccia' />
-      <Pizza pizzaName='Focaccia' />
-      <Pizza pizzaName='Focaccia' />
+      {pizzaData.length > 0 ? (
+        <>
+          <p>
+            Authentic Italian cuisine. 6 creative dishes to choose from. All
+            from our stone oven, all organic, all delicious.
+          </p>
+
+          <ul className='pizzas'>
+            {pizzaData.map((pizza) => {
+              return (
+                <Pizza
+                  key={pizza.name}
+                  pizzaName={pizza.name}
+                  pizzaIngredients={pizza.ingredients}
+                  pizzaImg={pizza.photoName}
+                  price={pizza.price}
+                  soldOut={pizza.soldOut}
+                />
+              );
+            })}
+          </ul>
+        </>
+      ) : (
+        "No pizzas available"
+      )}
     </main>
+  );
+};
+
+const Pizza = (props) => {
+  const { pizzaName, pizzaIngredients, pizzaImg, price, soldOut } = props;
+  return (
+    <li className={`pizza ${soldOut ? "sold-out" : ""}`}>
+      <img src={pizzaImg} alt={pizzaName} />
+      <div>
+        <h3>{pizzaName}</h3>
+        <p>{pizzaIngredients}</p>
+        <span>{soldOut ? "SOLD OUT" : price}</span>
+      </div>
+    </li>
   );
 };
 
 const Footer = () => {
   const hour = new Date().getHours();
-  const openHour = 8;
+  const openHour = 0;
   const closeHour = 20;
   const isOpen = hour >= openHour && hour < closeHour;
+
   return (
     <footer className='footer'>
       <p>{new Date().toLocaleString()}</p>
-      <p>{isOpen ? "We are open" : "We are closed"}</p>
+      <p>
+        {isOpen ? (
+          <Order closeHour={closeHour} openHour={openHour} />
+        ) : (
+          "We are closed"
+        )}
+      </p>
       <p>© 2023 Jay's Pizzeria</p>
     </footer>
   );
 };
 
-const Pizza = (props) => {
+const Order = ({ closeHour, openHour }) => {
   return (
-    <div>
-      <img src='pizzas/focaccia.jpg' alt='Focaccia' />
-      <h3>{props.pizzaName}</h3>
-      <p>Bread with italian olive oil and rosemary</p>
+    <div className='order'>
+      <p>
+        We're open from {openHour}:00 to {closeHour}:00. Come visit us or order
+        online.
+      </p>
+      <button className='btn'>Order</button>
     </div>
   );
 };
