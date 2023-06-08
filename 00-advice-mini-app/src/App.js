@@ -10,6 +10,11 @@ export default function App() {
     console.log(data.slip.advice);
     setAdvice(data.slip.advice);
     setCount((c) => c + 1);
+
+    const movies = {
+      title: "Inception",
+      year: 2010,
+    };
   }
 
   //For when When the component first gets loaded
