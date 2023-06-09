@@ -7,6 +7,15 @@ const messages = [
 ];
 
 function App() {
+  return (
+    <div className='container'>
+      <Steps />
+      <Steps />
+    </div>
+  );
+}
+
+function Steps() {
   const [step, setStep] = useState(1);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -25,7 +34,7 @@ function App() {
   }
 
   return (
-    <>
+    <div>
       <button className='close' onClick={() => setIsOpen(!isOpen)}>
         &times;
       </button>
@@ -58,7 +67,7 @@ function App() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
