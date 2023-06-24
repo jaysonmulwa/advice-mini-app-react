@@ -1,20 +1,45 @@
 import "./App.css";
 import { useState } from "react";
 
-let initialItems = [
-  { id: "1", description: "Passport", quantity: 2, packed: false },
-  { id: "2", description: "Underwear", quantity: 21, packed: true },
-  { id: "3", description: "Socks", quantity: 12, packed: false },
-  { id: "4", description: "Cufflinks", quantity: 3, packed: false },
-];
-
 function App() {
+  const [items, setItems] = useState([]);
+
+  function handleAddItems(newItem) {
+    setItems((items) => [...items, newItem]);
+  }
+
+  function handleRemoveItems(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
+  function handleToggleItems(id) {
+    setItems((items) =>
+      items.map((item) => {
+        if (item.id !== id) return item;
+        return { ...item, packed: !item.packed };
+      })
+    );
+  }
+
+  function handleClearList() {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear the list?"
+    );
+    if (!confirmed) return;
+    setItems([]);
+  }
+
   return (
     <div className='app'>
       <Logo />
-      <Form />
-      <PackagingList />
-      <Stats />
+      <Form onAddItems={handleAddItems} />
+      <PackagingList
+        items={items}
+        onRemoveItems={handleRemoveItems}
+        onToggleItems={handleToggleItems}
+        clearList={handleClearList}
+      />
+      <Stats items={items} />
     </div>
   );
 }
@@ -23,7 +48,7 @@ function Logo() {
   return <h1>Travel List</h1>;
 }
 
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -33,7 +58,8 @@ function Form() {
     if (!description) return;
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
-    initialItems = [...initialItems, newItem];
+
+    onAddItems(newItem);
 
     setDescription("");
     setQuantity(1);
@@ -60,33 +86,82 @@ function Form() {
   );
 }
 
-function PackagingList() {
+function PackagingList({ items, onRemoveItems, onToggleItems, clearList }) {
+  const [sortBy, setSortBy] = useState("input");
+  let sortedItems;
+
+  if (sortBy === "input") {
+    sortedItems = items;
+  }
+
+  if (sortBy === "description") {
+    sortedItems = items.sort((a, b) =>
+      a.description.localeCompare(b.description)
+    );
+  }
+
+  if (sortBy === "packed") {
+    sortedItems = items.sort((a, b) => Number(a.packed) - Number(b.packed));
+  }
+
   return (
     <div className='list'>
       <ul>
-        {initialItems.map((item) => (
-          <Item key={item.id} item={item} />
+        {sortedItems?.map((item) => (
+          <Item
+            key={item.id}
+            item={item}
+            onRemoveItems={onRemoveItems}
+            onToggleItems={onToggleItems}
+          />
         ))}
       </ul>
+
+      <div className='actions'>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value='input'>Sort by input order</option>
+          <option value='description'>Sort by description</option>
+          <option value='packed'>Sort by packed status</option>
+        </select>
+
+        <button onClick={clearList}>Clear list</button>
+      </div>
     </div>
   );
 }
 
-function Item({ item: { id, description, quantity, packed } }) {
+function Item({
+  item: { id, description, quantity, packed },
+  onRemoveItems,
+  onToggleItems,
+}) {
   return (
     <li key={id}>
+      <input
+        type='checkbox'
+        checked={packed}
+        onChange={() => onToggleItems(id)}
+      />
       <span style={packed ? { textDecoration: "line-through" } : {}}>
         {quantity} {description}
       </span>
-      <button className='remove'>Remove</button>
+      <button onClick={() => onRemoveItems(id)} className='remove'>
+        Remove
+      </button>
     </li>
   );
 }
 
-function Stats() {
+function Stats({ items }) {
+  const numItems = items.length || 0;
+  const numPackedItems = items.filter((item) => item.packed).length;
+  const percentage = numItems ? (numPackedItems / numItems) * 100 : 0;
   return (
-    <footer>
-      <em>You have X items in your list</em>
+    <footer className='stats'>
+      <em>
+        You have {numItems} items in your list and you have already packed{" "}
+        {numPackedItems} items {percentage} %.
+      </em>
     </footer>
   );
 }
